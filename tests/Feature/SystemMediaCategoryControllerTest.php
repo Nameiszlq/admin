@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\SystemMedia;
 use App\Models\SystemMediaCategory;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Str;
 use Tests\AdminTestCase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -252,6 +253,12 @@ class SystemMediaCategoryControllerTest extends AdminTestCase
         $res = $this->storeSystemMedia($categoryId, ['file' => 'not a file']);
         $res->assertJsonValidationErrors(['file']);
 
+        // file max filename length
+        $res = $this->storeSystemMedia($categoryId, [
+            'file' => UploadedFile::fake()->image(str_repeat('a', SystemMedia::MAX_FILENAME_LENGTH + 1), 10, 10),
+        ]);
+        $res->assertJsonValidationErrors(['file']);
+
         $file = UploadedFile::fake()->image('avatar.jpg', 200, 200);
 
         $res = $this->storeSystemMedia($categoryId, [
@@ -260,12 +267,13 @@ class SystemMediaCategoryControllerTest extends AdminTestCase
         ]);
         $res->assertStatus(201);
 
-        $filename = md5_file($file).'.jpg';
-        $path = Controller::UPLOAD_FOLDER_PREFIX.'/tests/'.$filename;
+        $key = md5_file($file);
+        $path = Controller::UPLOAD_FOLDER_PREFIX.'/tests/'.$key.'.jpg';
         $this->assertDatabaseHas('system_media', [
             'id' => $this->getLastInsertId('system_media'),
             'category_id' => $categoryId,
-            'filename' => $filename,
+            'filename' => $file->getClientOriginalName(),
+            'key' => $key,
             'size' => $file->getSize(),
             'ext' => 'jpg',
             'mime_type' => $file->getMimeType(),

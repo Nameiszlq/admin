@@ -8,8 +8,10 @@ use Symfony\Component\HttpFoundation\File\Exception\FileException;
 
 class SystemMedia extends Model
 {
+    const MAX_FILENAME_LENGTH = 100;
+
     protected $fillable = [
-        'filename', 'ext', 'category_id', 'path', 'size', 'mime_type',
+        'filename', 'key', 'ext', 'category_id', 'path', 'size', 'mime_type',
     ];
     protected $casts = [
         'category_id' => 'integer',
@@ -53,7 +55,7 @@ class SystemMedia extends Model
     protected function hasSameFile()
     {
         return !!static::query()
-            ->where('filename', $this->filename)
+            ->where('key', $this->key)
             ->where('id', '<>', $this->id)
             ->first();
     }

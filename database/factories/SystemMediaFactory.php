@@ -13,6 +13,7 @@ $factory->define(SystemMedia::class, function (Faker $faker) {
 
     return [
         'filename' => $filename,
+        'key' => md5($filename),
         'ext' => $ext,
         'category_id' => 0,
         'path' => '/'.$faker->randomElement($dimensions).'x'.$faker->randomElement($dimensions).'/'.substr($faker->hexColor, 1),

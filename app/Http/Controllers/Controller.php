@@ -10,6 +10,7 @@ use Illuminate\Routing\Controller as BaseController;
 use Illuminate\Foundation\Validation\ValidatesRequests;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class Controller extends BaseController
 {
@@ -52,15 +53,13 @@ class Controller extends BaseController
         $folder = static::UPLOAD_FOLDER_PREFIX.($folder ? '/'.trim($folder, '/') : '');
 
         $files = array_map(function (UploadedFile $file) use ($driver, $folder) {
-            $md5 = md5_file($file);
+            $key = md5_file($file);
             $ext = $file->getClientOriginalExtension();
-
-            $filename = $md5.($ext ? ".{$ext}" : '');
-
-            $path = $driver->putFileAs($folder, $file, $filename);
+            $path = $driver->putFileAs($folder, $file, $key.($ext ? ".{$ext}" : ''));
 
             return [
-                'filename' => $filename,
+                'filename' => $file->getClientOriginalName(),
+                'key' => $key,
                 'ext' => $ext,
                 'path' => $path,
                 'size' => $file->getSize(),
