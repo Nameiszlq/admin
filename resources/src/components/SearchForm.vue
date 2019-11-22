@@ -50,10 +50,13 @@ export default {
         }
       })
 
-      this.$router.push({
+      const to = {
         path: this.$route.path,
         query,
-      })
+      }
+      if (this.$route.fullPath !== this.$router.resolve(to).route.fullPath) {
+        this.$router.push(to)
+      }
     },
     onReset() {
       this.form = {}
